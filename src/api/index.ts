@@ -1,9 +1,11 @@
 import Axios from 'axios'
 import Vue from 'vue'
+import { Message } from 'element-ui'
 import type { ApiErrorOptions } from './ApiError'
 import ApiError from './ApiError'
 
 function createApiError(options: ApiErrorOptions) {
+  Message.error(<string>options.message)
   return new ApiError(options).reject()
 }
 
@@ -15,6 +17,7 @@ const axios = Axios.create({
 
 // 添加请求拦截器
 axios.interceptors.request.use((config) => {
+  config.headers.token = sessionStorage.accessToken
   return config
 }, (error) => {
   return createApiError({ error })
@@ -22,7 +25,7 @@ axios.interceptors.request.use((config) => {
 
 // 添加响应拦截器
 axios.interceptors.response.use((response) => {
-  if (response.data.head?.status !== 0) {
+  if (response.data.head?.status !== 0 && response.headers['content-type'].includes('application/json')) {
     return createApiError({
       url: response?.config.url,
       response,
@@ -40,7 +43,7 @@ axios.interceptors.response.use((response) => {
 })
 
 export function post(url: string, params: any, config: any = {}) {
-  const userData: any = {}
+  const userData: any = sessionStorage
 
   const formattedParams = {
     head: {
@@ -57,7 +60,7 @@ export function post(url: string, params: any, config: any = {}) {
     con: params,
   }
 
-  return axios.post(url, formattedParams).then(res => res.data)
+  return axios.post(url, formattedParams, config).then(res => res.data)
 }
 
 Vue.config.errorHandler = (err, vm) => {
@@ -65,6 +68,5 @@ Vue.config.errorHandler = (err, vm) => {
     // 处理接口错误
   }
 
-  console.error(err)
   Vue.util.warn(err.message, vm)
 }
