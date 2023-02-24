@@ -56,6 +56,13 @@ const config = defineConfig({
 
   server: {
     port: 3333,
+    proxy: {
+      '/api': {
+        target: 'http://192.168.9.94:9902',
+        changeOrigin: true,
+        rewrite: path => path.replace('/api', ''),
+      },
+    },
   },
 })
 
