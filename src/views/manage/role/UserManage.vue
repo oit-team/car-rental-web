@@ -23,7 +23,6 @@ export default defineComponent({
         table: {
           data: this.data?.resultList,
           actions: {
-            width: 150,
             buttons: [
               {
                 tip: '编辑',
